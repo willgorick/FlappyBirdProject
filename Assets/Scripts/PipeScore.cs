@@ -21,7 +21,7 @@ public class PipeScore : MonoBehaviour
 
     void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.layer == 3) {
+        if (other.gameObject.layer == 3 && !meta.gameIsOver) {
             meta.addScore(1);
         }
     }
