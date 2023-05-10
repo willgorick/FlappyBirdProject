@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
+using UnityEngine.InputSystem;
 
 public class MetaScript : MonoBehaviour
 {
@@ -14,18 +15,33 @@ public class MetaScript : MonoBehaviour
     public int highScoreVal = 0;
     public GameObject gameOverScreen;
 
+    [SerializeField]
+    private InputActionReference escape;
+
+    private void OnEnable() 
+    {
+        escape.action.performed += Quit;
+    }
+
+    private void OnDisable()
+    {
+        escape.action.performed -= Quit;   
+    }
+
+    public void Quit(InputAction.CallbackContext obj)
+    {
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+            #endif
+            Application.Quit();
+    }
+
     private void Start() {
         highScoreVal = PlayerPrefs.GetInt("high_score", 0);
         highScoreText.text = "High Score: " + highScoreVal;
     }
 
     private void Update() {
-        if (Input.GetKeyDown(KeyCode.Escape)) {
-            #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-            #endif
-            Application.Quit();
-        }
     }
 
     public void addScore(int scoreToAdd)
