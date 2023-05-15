@@ -1,5 +1,6 @@
-using System.Collections;
-using System.Collections.Generic;
+using System;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -14,6 +15,7 @@ public class MetaScript : MonoBehaviour
     public TMP_Text highScoreText;
     public int highScoreVal = 0;
     public GameObject gameOverScreen;
+    public string saveFileLocation;
 
     [SerializeField]
     private InputActionReference escape;
@@ -37,7 +39,8 @@ public class MetaScript : MonoBehaviour
     }
 
     private void Start() {
-        highScoreVal = PlayerPrefs.GetInt("high_score", 0);
+        saveFileLocation = Application.persistentDataPath + "/flappy_save.dat";
+        highScoreVal = loadGame();
         highScoreText.text = "High Score: " + highScoreVal;
     }
 
@@ -50,6 +53,7 @@ public class MetaScript : MonoBehaviour
         scoreText.text = playerScore.ToString();
         if (playerScore > highScoreVal)
         {
+            highScoreVal = playerScore;
             highScoreText.text = "High Score: " + playerScore;
         }
     }
@@ -62,15 +66,48 @@ public class MetaScript : MonoBehaviour
     [ContextMenu ("Reset High Score")]
     public void resetHighScore()
     {
-        PlayerPrefs.SetInt("high_score", 0);
+        saveGame();
     }
 
     public void gameOver()
     {
         gameOverScreen.SetActive(true);
-        if (playerScore > highScoreVal)
-        {
-            PlayerPrefs.SetInt("high_score", playerScore);
-        }
+        saveGame(highScoreVal);
     }
+
+    public void saveGame(int newHighScore=0)
+    {
+        BinaryFormatter bf = new BinaryFormatter();
+        FileStream file = File.Create(saveFileLocation);
+        SaveData data = new SaveData();
+        data.highScore = newHighScore;
+        bf.Serialize(file, data);
+        file.Close();
+        Debug.Log("Game data saved");
+    }
+
+    public int loadGame()
+    {
+        int currentHighScore = 0;
+        Debug.Log("looking for save file at: " + saveFileLocation);
+        if (File.Exists(saveFileLocation))
+        {
+            BinaryFormatter bf = new BinaryFormatter();
+            FileStream file = File.Open(saveFileLocation, FileMode.Open);
+            SaveData data = (SaveData)bf.Deserialize(file);
+            currentHighScore = data.highScore > 0 ? data.highScore : 0;
+            Debug.Log("Accessed save file and found high score of: " + currentHighScore);
+        }
+        else
+        {
+            Debug.Log("No high score saved yet, setting to 0");
+        }
+        return currentHighScore;
+    }
+}
+
+[SerializableAttribute]
+class SaveData
+{
+    public int highScore;
 }
