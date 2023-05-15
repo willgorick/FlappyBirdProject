@@ -1002,6 +1002,7 @@ MonoBehaviour:
   highScoreText: {fileID: 1096940999}
   highScoreVal: 0
   gameOverScreen: {fileID: 1264593905}
+  escape: {fileID: -8871324086097110272, guid: 8db67de8add2b464cad4dd65874be819, type: 3}
 --- !u!1 &1834846673
 GameObject:
   m_ObjectHideFlags: 0
